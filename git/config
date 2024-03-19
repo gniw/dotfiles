@@ -1,0 +1,30 @@
+[credential]
+	helper = /usr/lib/git-core/git-credential-libsecret
+
+[core]
+	editor = nvim
+
+[user]
+	email = gniw@users.noreply.github.com
+	name = Tsubasa Yamamoto
+
+[github]
+	user = gniw
+
+[pull]
+	ff = only
+	rebase = true
+  autoStash = true
+
+[merge]
+	ff = false
+
+[init]
+	defaultBranch = main
+
+[fetch]
+	prune = true
+
+[rebase]
+  autoStash = true
+
