@@ -2,9 +2,10 @@ local set = vim.opt
 
 -- leader
 vim.g.mapleader = "'"
+vim.g.maplocalleader = " "
 
 -- options
-set.clipboard:append { 'unnamedplus' }
+set.clipboard:append({ "unnamedplus" })
 set.laststatus = 3
 set.shiftwidth = 2
 set.tabstop = 2
@@ -13,9 +14,9 @@ set.wrap = false
 set.signcolumn = "yes"
 set.expandtab = true
 set.mouse = ""
-set.foldmethod = 'marker'
+set.foldmethod = "marker"
 set.termguicolors = true
-set.whichwrap:append {
+set.whichwrap:append({
 	["h"] = true,
 	["l"] = true,
 	["<"] = true,
@@ -23,8 +24,8 @@ set.whichwrap:append {
 	["["] = true,
 	["]"] = true,
 	["~"] = true,
-}
-set.backspace = { 'start', 'eol', 'indent' }
+})
+set.backspace = { "start", "eol", "indent" }
 set.wildignore = {
 	".git",
 	".hg",
@@ -43,4 +44,7 @@ set.wildignore = {
 	"*~",
 	"*.DS_Store",
 }
-set.fileencodings = { 'ucs-bom', 'utf-8', 'sjis', 'default' }
+set.fileencodings = { "ucs-bom", "utf-8", "sjis", "default" }
+
+-- Prepend mise shims to PATH
+vim.env.PATH = vim.env.HOME .. "/.local/share/mise/shims:" .. vim.env.PATH

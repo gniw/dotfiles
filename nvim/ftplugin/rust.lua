@@ -1,3 +1,5 @@
-vim.o.tabstop = 2
-vim.o.shiftwidth = 2
-vim.o.softtabstop = 2
+local set = vim.bo
+
+set.tabstop = 2
+set.shiftwidth = 2
+set.softtabstop = 2

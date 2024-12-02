@@ -78,5 +78,7 @@ bind generic ca !?@git commit --amend --no-edit
 bind generic K view-help
 bind generic <C-w><C-w> view-next
 
+bind generic ~ !@gh pr view %(commit)
+
 bind refs ! none
 bind refs d ?git branch -D %(branch)
