@@ -37,6 +37,7 @@ local my_config = {
 	font_size = 14,
 	adjust_window_size_when_changing_font_size = false,
 	dpi = 144,
+  audible_bell = "Disalbed",
 
 	window_frame = {
 		font_size = 12,
