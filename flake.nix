@@ -31,11 +31,17 @@
     #   linux
     # ----------------------------------------------
     homeConfigurations = {
-      "wing@archlinux" = home-manager.lib.homeManagerConfiguration rec {
-        pkgs = import nixpkgs { inherit overlays system; };
+      "wing@archlinux" = let 
         system = "x86_64-linux";
+        username = "wing";
+        hostname = "archlinux";
+        homeDirectory = "/home/${username}";
+        pkgs = import nixpkgs { inherit system overlays; };
+      in
+      home-manager.lib.homeManagerConfiguration {
+        inherit pkgs;
         extraSpecialArgs = {
-          inherit inputs;
+          inherit inputs username homeDirectory;
         };
         modules = [
           ./nix/home-manager/home.nix
