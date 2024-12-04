@@ -1,4 +1,4 @@
-{ config, pkgs, lib, username, homeDirectory, ... }:
+{ config, pkgs, lib, username, homeDirectory, dotfiles, ... }:
 let
   cica = import ../fonts/cica.nix {
     inherit (pkgs) stdenvNoCC fetchzip;
@@ -15,9 +15,12 @@ in
 
   # Packages that should be installed to the user profile.
   home.packages = with pkgs; [
+    # Nixpkgs has a simple `bash` for script/build cases, and a `bashInteractive` for human use.
+    bashInteractive
     git
-    curl
+    gh
     ghq
+    curl
     neovim
     wezterm
     lazygit
@@ -37,6 +40,24 @@ in
 
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
+
+
+  # Note that while the home-manager integration is recommended,
+  # some use cases require the use of features only present in some versions of nix-direnv.
+  # It is much harder to control the version of nix-direnv installed with this method.
+  # If you require such specific control, please use another method of installing nix-direnv. 
+  programs.direnv = {
+    enable = true;
+    enableBashIntegration = true; # see note on other shells below
+    nix-direnv.enable = true;
+    silent = true;
+  };
+
+  programs.bash = {
+    enable = true;
+    profileExtra = builtins.readFile "${dotfiles}/.profile";
+    bashrcExtra = builtins.readFile "${dotfiles}/.bashrc";
+  };
 
   # This value determines the Home Manager release that your
   # configuration is compatible with. This helps avoid breakage

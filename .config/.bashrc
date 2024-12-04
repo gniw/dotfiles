@@ -2,9 +2,6 @@
 # ~/.bashrc
 #
 
-# If not running interactively, don't do anything
-[[ $- != *i* ]] && return
-
 alias ls='ls -al --color=auto'
 alias vi='vim'
 alias vim='nvim'
@@ -42,15 +39,8 @@ fi
 # source other files
 #####################################
 
-# rust
-. "$HOME/.cargo/env"
-
 # fzf-completions
-. /usr/share/fzf/key-bindings.bash
-. /usr/share/fzf/completion.bash
+eval "$(fzf --bash)"
 
 # gh
-# eval "$(gh completion -s bash)"
-
-# mise
-eval "$(~/.local/bin/mise activate bash)"
+eval "$(gh completion -s bash)"

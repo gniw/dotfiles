@@ -25,6 +25,7 @@
     overlays = [
       neovim-nightly-overlay.overlays.default
     ];
+    dotfiles = ./.config;
   in
   {
     # ----------------------------------------------
@@ -41,7 +42,7 @@
       home-manager.lib.homeManagerConfiguration {
         inherit pkgs;
         extraSpecialArgs = {
-          inherit inputs username homeDirectory;
+          inherit username homeDirectory dotfiles;
         };
         modules = [
           ./nix/home-manager/home.nix
@@ -85,13 +86,35 @@
           ''
         );
       };
-      update = {
+      update-all = {
         type = "app";
         program = toString (
-          pkgs.writeShellScript "install-script" ''
+          pkgs.writeShellScript "update-script" ''
             set -e
             echo "Updating flake..."
             nix flake update
+            echo "Updating nix-darwin..."
+            darwin-rebuild switch --flake .
+            echo "nix-darwin Update complete!"
+          ''
+        );
+      };
+      update-flake = {
+        type = "app";
+        program = toString (
+          pkgs.writeShellScript "update-flake-script" ''
+            set -e
+            echo "Updating flake..."
+            nix flake update
+            echo "flakes Update complete!"
+          ''
+        );
+      };
+      update-config = {
+        type = "app";
+        program = toString (
+          pkgs.writeShellScript "update-script" ''
+            set -e
             echo "Updating nix-darwin..."
             darwin-rebuild switch --flake .
             echo "nix-darwin Update complete!"
@@ -114,11 +137,12 @@
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
             home-manager.users.${username} = import ./nix/home-manager/home.nix;
-            home-manager.extraSpecialArgs = { inherit username homeDirectory; };
+            home-manager.extraSpecialArgs = { inherit username homeDirectory dotfiles; };
+            home-manager.backupFileExtension = "backup";
           }
         ];
         specialArgs = {
-          inherit inputs;
+          inherit inputs username;
         };
       };
     };
@@ -127,5 +151,3 @@
 
 # update:
 #   nix run .#update (all)
-#   nix run .#update-home
-#   nix run .#update-darwin

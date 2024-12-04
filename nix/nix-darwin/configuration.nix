@@ -1,8 +1,17 @@
-{ config, pkgs, lib, inputs, ... }:
+{ config, pkgs, lib, inputs, username, ... }:
 {
   # List packages installed in system profile. To search by name, run:
   # $ nix-env -qaP | grep wget
   environment.systemPackages = [];
+
+  # make no effect??
+  environment.shells = [ pkgs.bash ];
+  users.users.${username} = with pkgs; {
+    shell = bashInteractive;
+    packages = [
+      coreutils
+    ];
+  };
 
   # nix
   nix = {
@@ -46,7 +55,7 @@
   homebrew = {
     enable = true;
     onActivation = {
-      autoUpdate = true;
+      autoUpdate = false;
       cleanup = "uninstall";
     };
   };

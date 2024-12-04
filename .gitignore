@@ -1,3 +1,4 @@
 gh/hosts.yml
 lazygit/state.yml
 lazy-lock.json
+.config/direnv/lib/hm-nix-direnv.sh
