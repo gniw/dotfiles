@@ -1,0 +1,14 @@
+#
+# ~/.profile
+#
+
+export EDITOR=nvim
+
+# for mac xdg settings
+export XDG_DATA_HOME=${XDG_DATA_HOME:-$HOME/.local/share}
+export XDG_CONFIG_HOME=${XDG_DATA_HOME:-$HOME/.config}
+export XDG_STATE_HOME=${XDG_STATE_HOME:-$HOME/.local/state}
+export XDG_CACHE_HOME=${XDG_CACHE_HOME:-$HOME/.cache}
+
+# remove duplicate path
+PATH=$(printf %s "$PATH" | awk -v RS=: -v ORS=: '!a[$0]++')

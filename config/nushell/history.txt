@@ -1,0 +1,55 @@
+config nu
+exit
+$env | table
+echo "foo" > /dev/null
+echo "foo" | ignore
+!5
+!foo
+config nu
+config env
+config nu
+exit
+config nu
+exit
+config nu
+exit
+config nu
+exit
+config nu
+exit
+config nu
+exit
+config nu
+exit
+config nu
+exit
+ghq list
+ghq list | table
+ghq list | to nuon 
+ls
+ghq list | split row "\n"
+curl \
+(<\n>curl<\n>https://www.google.com<\n>)
+ls |<\n>where name =~ "nix" |<\n>get name
+$in
+ls |<\n>where name =~ "nix" |<\n>get name |<\n>print $in
+ls
+ls<\n>.bat-wrapped 
+ls
+aaaaa<\n>aaaaa<\n>aaaaa<\n>aaaaa<\n>
+cd -
+exit
+cd (ls | where type == dir | each { |row| $row.name} | str join (char nl) | fzf | decode utf-8 | str trim)
+exit
+keybindings list | where type == "events"
+keybindings list
+keybindings list | where type == "edit"
+keybindings list | where type == "edits"
+exit
+ghq get https://github.com/super-studio/ecforce_cdp 
+fzf
+keybindings list --keycodes 
+exit
+keybindings list --modifiers 
+exit
+fzf

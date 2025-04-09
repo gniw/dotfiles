@@ -22,9 +22,15 @@
     ...
   } @inputs :
   let
+    # ----------------------------------------------
+    #   nix settings
+    # ----------------------------------------------
     overlays = [
       neovim-nightly-overlay.overlays.default
     ];
+    config = {
+      allowUnfree = true;
+    };
     dotfiles = ./.config;
   in
   {
@@ -37,7 +43,7 @@
         username = "wing";
         hostname = "archlinux";
         homeDirectory = "/home/${username}";
-        pkgs = import nixpkgs { inherit system overlays; };
+        pkgs = import nixpkgs { inherit system overlays config; };
       in
       home-manager.lib.homeManagerConfiguration {
         inherit pkgs;
@@ -125,7 +131,7 @@
 
     darwinConfigurations = let
       system = "aarch64-darwin";
-      pkgs = import nixpkgs { inherit system overlays; };
+      pkgs = import nixpkgs { inherit system overlays config; };
       inherit (import ./nix/nix-darwin/user.nix) username hostname homeDirectory;
     in {
       ${hostname} = nix-darwin.lib.darwinSystem {
@@ -136,13 +142,17 @@
           {
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
-            home-manager.users.${username} = import ./nix/home-manager/home.nix;
+            home-manager.users.${username} = { ... }: {
+              imports = [
+                ./nix/home-manager/home.nix
+              ];
+            };
             home-manager.extraSpecialArgs = { inherit username homeDirectory dotfiles; };
             home-manager.backupFileExtension = "backup";
           }
         ];
         specialArgs = {
-          inherit inputs username;
+          inherit inputs username homeDirectory;
         };
       };
     };
