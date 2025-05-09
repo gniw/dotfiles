@@ -3,3 +3,5 @@ lazygit/state.yml
 lazy-lock.json
 .config/direnv/lib/hm-nix-direnv.sh
 config/colima/default/daemon/daemon.log
+config/direnv/lib
+config/github-copilot/apps.json

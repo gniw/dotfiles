@@ -44,3 +44,6 @@ eval "$(fzf --bash)"
 
 # gh
 eval "$(gh completion -s bash)"
+
+# 1password cli
+# source /Users/tsubasa.yamamoto/.config/op/plugins.sh

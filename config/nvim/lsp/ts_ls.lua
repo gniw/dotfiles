@@ -5,11 +5,6 @@ return {
 		"tsconfig.json",
 		"jsconfig.json",
 	},
-	-- root_dir = vim.fs.root(0, {
-	-- 	"package.json",
-	-- 	"tsconfig.json",
-	-- 	"jsconfig.json",
-	-- }),
 	cmd = {
 		"typescript-language-server",
 		"--stdio",
@@ -22,9 +17,9 @@ return {
 		"typescriptreact",
 		"typescript.tsx",
 	},
-	on_attach = function()
-		print("ts_ls is attached!!")
-	end,
+	-- on_attach = function()
+	-- 	print("ts_ls is attached!!")
+	-- end,
 	-- init_options = {
 	-- }
 }

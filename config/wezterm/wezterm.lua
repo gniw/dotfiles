@@ -137,11 +137,11 @@ default_config = {
 			mods = "LEADER",
 			action = act.PasteFrom("Clipboard"),
 		},
-    {
-      key = "D",
-      mods = "CTRL",
-      action = act.ShowDebugOverlay,
-    },
+    -- {
+    --   key = "D",
+    --   mods = "CTRL",
+    --   action = act.ShowDebugOverlay,
+    -- },
     {
       key = "]",
       mods = "LEADER",
@@ -151,6 +151,16 @@ default_config = {
       key = "[",
       mods = "LEADER",
       action = act.ActivateTabRelative(-1),
+    },
+    {
+      key = "=",
+      mods = "META",
+      action = wezterm.action.IncreaseFontSize,
+    },
+    {
+      key = "-",
+      mods = "META",
+      action = wezterm.action.DecreaseFontSize,
     },
 	},
 }

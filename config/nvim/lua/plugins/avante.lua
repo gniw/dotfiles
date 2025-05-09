@@ -1,7 +1,18 @@
 return {
   "yetone/avante.nvim",
+  -- enabled = false,
   event = "VeryLazy",
   version = false, -- Set this to "*" to always pull the latest release version, or set it to false to update to the latest code changes.
+
+
+
+     
+
+  config = function (_, opts)
+  	require("avante").setup(opts)
+  	-- INFO: fix the border highlights
+  	vim.api.nvim_set_hl(0, "AvanteSidebarWinSeparator", { link = "AvanteSidebarWinHorizontalSeparator" })
+  end,
   opts = {
     -- add any opts here
     -- for example
@@ -19,7 +30,7 @@ return {
       minimize_diff = true,
     },
     windows = {
-      position = "right",
+      position = "smart",
       wrap = true,
       width = 35,
       sidebar_header = {
@@ -41,6 +52,36 @@ return {
       },
     },
 
+    -- system_prompt as function ensures LLM always has latest MCP server state
+    -- This is evaluated for every message, even in existing chats
+    system_prompt = function()
+      local hub = require("mcphub").get_hub_instance()
+      return hub:get_active_servers_prompt()
+    end,
+    -- Using function prevents requiring mcphub before it's loaded
+    custom_tools = function()
+      return {
+        require("mcphub.extensions.avante").mcp_tool(),
+      }
+    end,
+
+    file_selector = {
+      provider = "snack",
+    },
+    -- MCPHub's built-in Neovim server provides most basic development tools by default.
+    -- If you prefer using these built-in tools, you should disable the corresponding Avante tools to prevent duplication:
+    disabled_tools = {
+      "list_files",    -- Built-in file operations
+      "search_files",
+      "read_file",
+      "create_file",
+      "rename_file",
+      "delete_file",
+      "create_dir",
+      "rename_dir",
+      "delete_dir",
+      "bash",         -- Built-in terminal access
+    },
     -- provider settings
     -- copilot = {
     --     model = "gpt-4o-2024-05-13",
@@ -76,15 +117,17 @@ return {
     "nvim-lua/plenary.nvim",
     "MunifTanjim/nui.nvim",
     --- The below dependencies are optional,
-    "echasnovski/mini.pick", -- for file_selector provider mini.pick
-    "nvim-telescope/telescope.nvim", -- for file_selector provider telescope
-    "hrsh7th/nvim-cmp", -- autocompletion for avante commands and mentions
-    "ibhagwan/fzf-lua", -- for file_selector provider fzf
+    -- "echasnovski/mini.pick", -- for file_selector provider mini.pick
+    -- "nvim-telescope/telescope.nvim", -- for file_selector provider telescope
+    -- "hrsh7th/nvim-cmp", -- autocompletion for avante commands and mentions
+    -- "ibhagwan/fzf-lua", -- for file_selector provider fzf
     "nvim-tree/nvim-web-devicons", -- or echasnovski/mini.icons
+    "ravitemer/mcphub.nvim", -- for mcp servers
     {
       "zbirenbaum/copilot.lua", -- for providers='copilot'
       cmd = "Copilot",
       event = "InsertEnter",
+      opts = {},
       config = function()
         require("copilot").setup({})
       end,

@@ -4,12 +4,13 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
     neovim-nightly-overlay.url = "github:nix-community/neovim-nightly-overlay";
-    nix-darwin = {
-      url = "github:LnL7/nix-darwin";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+    _1password-shell-plugins.url = "github:1Password/shell-plugins";
     home-manager = {
       url = "github:nix-community/home-manager";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    mcp-servers-nix = {
+      url = "github:natsukium/mcp-servers-nix";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
@@ -18,7 +19,7 @@
     nixpkgs,
     neovim-nightly-overlay,
     home-manager,
-    nix-darwin,
+    mcp-servers-nix,
     ...
   } @inputs :
   let
@@ -27,137 +28,91 @@
     # ----------------------------------------------
     overlays = [
       neovim-nightly-overlay.overlays.default
+      mcp-servers-nix.overlays.default
     ];
     config = {
       allowUnfree = true;
     };
     dotfiles = ./.config;
-  in
-  {
-    # ----------------------------------------------
-    #   linux
-    # ----------------------------------------------
-    homeConfigurations = {
-      "wing@archlinux" = let 
+
+    users = [
+      {
+        system = "aarch64-darwin";
+        username = "tsubasa.yamamoto";
+        hostname = "SS0198";
+      }
+      {
         system = "x86_64-linux";
         username = "wing";
         hostname = "archlinux";
-        homeDirectory = "/home/${username}";
+      }
+    ];
+
+    supportedSystems = (attrSets: key:
+      let
+        # 各属性セットから特定のキーの値を取得（存在する場合のみ）
+        values = builtins.map
+          (set: if builtins.hasAttr key set then [set.${key}] else [])
+          attrSets;
+
+        # リストのリストをフラット化する
+        concatLists = builtins.concatLists values;
+      in
+      nixpkgs.lib.unique concatLists
+    ) users "system";
+
+    forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
+
+    makeHomeManagerConfig = configList: map(cfg:
+      let
+        inherit (cfg) system username hostname;
         pkgs = import nixpkgs { inherit system overlays config; };
       in
-      home-manager.lib.homeManagerConfiguration {
-        inherit pkgs;
-        extraSpecialArgs = {
-          inherit username homeDirectory dotfiles;
+      {
+        name = "${username}@${hostname}";
+        value = home-manager.lib.homeManagerConfiguration {
+          inherit pkgs;
+          extraSpecialArgs = {
+            inherit username mcp-servers-nix inputs;
+          };
+          modules = [
+            ./nix/home-manager/home.nix
+          ];
         };
-        modules = [
-          ./nix/home-manager/home.nix
-        ];
-      };
-    };
-    apps.x86_64-linux = let
-      pkgs = import nixpkgs { system = "x86_64-linux"; };
-    in {
-      update = {
-        type = "app";
-        program = toString (
-          pkgs.writeShellScript "install-script" ''
-            set -e
-            echo "Updating flake..."
-            nix flake update
-            echo "Installing nix-darwin..."
-            nix run nixpkgs#home-manager -- switch --flake .
-            echo "home-manager Install complete!"
-          ''
-        );
-      };
-    };
-
-    # ----------------------------------------------
-    #   aarch64-darwin
-    # ----------------------------------------------
-    apps.aarch64-darwin = let
-      pkgs = import nixpkgs { system = "aarch64-darwin"; };
-    in {
-      install = {
-        type = "app";
-        program = toString (
-          pkgs.writeShellScript "install-script" ''
-            set -e
-            echo "Updating flake..."
-            nix flake update
-            echo "Installing nix-darwin..."
-            nix run nix-darwin -- switch --flake .
-            echo "nix-darwin Install complete!"
-          ''
-        );
-      };
-      update-all = {
-        type = "app";
-        program = toString (
-          pkgs.writeShellScript "update-script" ''
-            set -e
-            echo "Updating flake..."
-            nix flake update
-            echo "Updating nix-darwin..."
-            darwin-rebuild switch --flake .
-            echo "nix-darwin Update complete!"
-          ''
-        );
-      };
-      update-flake = {
-        type = "app";
-        program = toString (
-          pkgs.writeShellScript "update-flake-script" ''
-            set -e
-            echo "Updating flake..."
-            nix flake update
-            echo "flakes Update complete!"
-          ''
-        );
-      };
-      update-config = {
-        type = "app";
-        program = toString (
-          pkgs.writeShellScript "update-script" ''
-            set -e
-            echo "Updating nix-darwin..."
-            darwin-rebuild switch --flake .
-            echo "nix-darwin Update complete!"
-          ''
-        );
-      };
-    };
-
-    darwinConfigurations = let
-      system = "aarch64-darwin";
-      pkgs = import nixpkgs { inherit system overlays config; };
-      inherit (import ./nix/nix-darwin/user.nix) username hostname homeDirectory;
-    in {
-      ${hostname} = nix-darwin.lib.darwinSystem {
-        inherit system pkgs;
-        modules = [
-          ./nix/nix-darwin/configuration.nix
-          home-manager.darwinModules.home-manager
-          {
-            home-manager.useGlobalPkgs = true;
-            home-manager.useUserPackages = true;
-            home-manager.users.${username} = { ... }: {
-              imports = [
-                ./nix/home-manager/home.nix
-              ];
-            };
-            home-manager.extraSpecialArgs = { inherit username homeDirectory dotfiles; };
-            home-manager.backupFileExtension = "backup";
-          }
-        ];
-        specialArgs = {
-          inherit inputs username homeDirectory;
+      }) configList;
+  in
+  {
+    homeConfigurations = builtins.listToAttrs(makeHomeManagerConfig users);
+  
+    apps = forAllSystems (
+      system:
+      let
+        pkgs = import nixpkgs { inherit system; };
+      in
+      {
+        "update" = {
+          type = "app";
+          program = toString (
+            pkgs.writeShellScript "update-script" ''
+              set -e
+              echo "Updating flake..."
+              nix flake update
+            ''
+          );
         };
-      };
-    };
+        "rebuild" = {
+          type = "app";
+          program = toString (
+            pkgs.writeShellScript "rebuild-script" ''
+              set -e
+              echo "Rebuild home-manager..."
+              nix run nixpkgs#home-manager -- switch --flake .
+              echo "home-manager Rebuild complete!"
+            ''
+          );
+        };
+      }
+    );
+
   };
 }
-
-# update:
-#   nix run .#update (all)
